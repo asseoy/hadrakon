@@ -32,11 +32,11 @@ export function createFx(G) {
   // breath: a cone of flame from the mouth, inheriting the dragon's speed
   X.breath = (dt) => {
     const D = G.dragon, F = G.flight, m = D.mouthWorld, f = D.headFwd;
-    for (let k = 0; k < Math.ceil(dt * 520); k++) {
-      const sp = 38 + Math.random() * 14, spread = 0.12;
+    for (let k = 0; k < Math.ceil(dt * 300); k++) {
+      const sp = 34 + Math.random() * 14, spread = 0.24;
       const vx = f.x + (Math.random() - 0.5) * spread, vy = f.y + (Math.random() - 0.5) * spread, vz = f.z + (Math.random() - 0.5) * spread;
-      fire.emit({ x: m.x, y: m.y, z: m.z, vx: vx * sp + F.vel.x, vy: vy * sp + F.vel.y, vz: vz * sp + F.vel.z, max: 0.55 + Math.random() * 0.25, s0: 0.5, s1: 4.5 + Math.random() * 2, drag: 2.2, up: 4,
-        c0: [1, 0.95, 0.7, 0.9], c1: [0.9, 0.18, 0.02, 0] });
+      fire.emit({ x: m.x, y: m.y, z: m.z, vx: vx * sp + F.vel.x, vy: vy * sp + F.vel.y, vz: vz * sp + F.vel.z, max: 0.55 + Math.random() * 0.25, s0: 0.8, s1: 7 + Math.random() * 3, drag: 2.4, up: 4,
+        c0: [1, 0.62, 0.18, 0.42], c1: [0.75, 0.1, 0.02, 0] });
       if (Math.random() < 0.15) sparks.emit({ x: m.x, y: m.y, z: m.z, vx: vx * sp * 1.2 + F.vel.x + (Math.random() - 0.5) * 8, vy: vy * sp + F.vel.y + Math.random() * 6, vz: vz * sp * 1.2 + F.vel.z + (Math.random() - 0.5) * 8, max: 0.9, s0: 0.25, s1: 0.1, drag: 1, up: -6, c0: [1, 0.8, 0.3, 1], c1: [1, 0.3, 0, 0] });
       if (Math.random() < 0.25) smoke.emit({ x: m.x + vx * 12, y: m.y + vy * 12, z: m.z + vz * 12, vx: vx * sp * 0.5 + F.vel.x * 0.5, vy: 3, vz: vz * sp * 0.5 + F.vel.z * 0.5, max: 2.2, s0: 3, s1: 9, drag: 1.5, up: 2, c0: [0.25, 0.22, 0.2, 0.35], c1: [0.4, 0.38, 0.36, 0] });
     }
