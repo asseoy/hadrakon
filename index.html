@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>הדרקון של הנשיא · שבט הנשיא</title>
+<meta name="theme-color" content="#1a1310">
+<link rel="icon" href="assets/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karantina:wght@400;700&family=Frank+Ruhl+Libre:wght@500;700;900&family=Heebo:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<canvas id="gl"></canvas>
+
+<div id="hud" class="hidden">
+  <div id="fires"></div>
+  <div id="obj" class="hidden"><small>משימה</small><span id="objText"></span></div>
+  <div id="boost"><i id="boostBar"></i><small>זינוק</small></div>
+  <div id="speed"><b id="speedNum">0</b><small>קמ״ש</small></div>
+  <div id="cross"></div>
+  <div id="marker" class="hidden"><i></i><span id="mkDist"></span></div>
+  <div id="prompt" class="hidden"></div>
+  <div id="radio" class="hidden"><div class="rHead"><b id="rName"></b><small id="rRole"></small></div><p id="rText"></p><em>Enter – דלג</em></div>
+</div>
+<div id="card" class="hidden"><small id="cardOver"></small><b id="cardTitle"></b></div>
+<div id="flashOv"></div>
+
+<div id="loading" class="screen"><div class="menuWrap"><img src="assets/logo.webp" alt="" class="menuLogo"><div class="over">בונים את העולם…</div><div class="bar"><i id="loadBar"></i></div></div></div>
+
+<div id="menu" class="screen hidden">
+  <div class="menuWrap">
+    <img src="assets/logo.webp" alt="" class="menuLogo">
+    <div class="over">שבט הנשיא מציג</div>
+    <h1 class="title">הדרקון של הנשיא</h1>
+    <p class="sub">בנינו דרקון מעמודים וחבלים. בלילה האחרון של המחנה – ברק פגע בו, והוא התעורר.</p>
+    <div class="menuBtns">
+      <button class="btn big" id="btnPlay">משחק חדש</button>
+      <button class="btn" id="btnContinue" disabled>המשך (<span id="contFires">0</span>/8 מדורות)</button>
+      <button class="btn" id="btnFree">טיסה חופשית</button>
+      <button class="btn" id="btnHelp">איך משחקים</button>
+      <button class="btn" id="btnSettings">הגדרות</button>
+    </div>
+  </div>
+</div>
+
+<div id="help" class="screen hidden">
+  <div class="panel">
+    <h2>איך משחקים</h2>
+    <table class="keys">
+      <tr><td><kbd>עכבר</kbd></td><td>לאן שמסתכלים – לשם הדרקון טס</td></tr>
+      <tr><td><kbd>W</kbd></td><td>לנפנף בכנפיים (מהר יותר)</td></tr>
+      <tr><td><kbd>S</kbd></td><td>לבלום ולרחף במקום</td></tr>
+      <tr><td><kbd>Shift</kbd></td><td>זינוק – נגמר ומתמלא לאט</td></tr>
+      <tr><td><kbd>רווח</kbd></td><td>לטפס למעלה</td></tr>
+      <tr><td><kbd>לחיצה</kbd> / <kbd>F</kbd></td><td>לירוק אש</td></tr>
+      <tr><td><kbd>E</kbd></td><td>להרים / להוריד חניכים</td></tr>
+      <tr><td><kbd>Enter</kbd></td><td>לדלג על הודעה ברדיו</td></tr>
+      <tr><td><kbd>Esc</kbd></td><td>עצירה</td></tr>
+    </table>
+    <p class="dim">צלילה מוסיפה מהירות, טיפוס לוקח ממנה. כדי להדליק משואה – טוס אליה לאט, הסתכל עליה וירוק אש עד שהיא נדלקת.</p>
+    <button class="btn" data-back>חזרה</button>
+  </div>
+</div>
+
+<div id="settings" class="screen hidden">
+  <div class="panel">
+    <h2>הגדרות</h2>
+    <label class="row">רגישות עכבר <input type="range" id="sSens" min="0.3" max="2.5" step="0.05"></label>
+    <label class="row">עוצמת קול <input type="range" id="sVol" min="0" max="1" step="0.05"></label>
+    <label class="row">היפוך עכבר למעלה/למטה <input type="checkbox" id="sInv"></label>
+    <label class="row">איכות גרפיקה <select id="sQual"><option value="high">גבוהה</option><option value="low">נמוכה (מחשב חלש)</option></select></label>
+    <button class="btn" data-back>חזרה</button>
+  </div>
+</div>
+
+<div id="pause" class="screen hidden">
+  <div class="menuWrap">
+    <h1 class="title small">עצירה</h1>
+    <div class="menuBtns">
+      <button class="btn big" id="btnResume">המשך לטוס</button>
+      <button class="btn" id="btnPHelp">איך משחקים</button>
+      <button class="btn" id="btnPSettings">הגדרות</button>
+      <button class="btn" id="btnQuit">לתפריט הראשי</button>
+    </div>
+  </div>
+</div>
+
+<div id="end" class="screen hidden">
+  <div class="menuWrap">
+    <img src="assets/logo.webp" alt="" class="menuLogo">
+    <div class="over">שמונה מדורות דולקות</div>
+    <h1 class="title small">מה שבונים ביחד – חי</h1>
+    <p class="sub" id="endStats"></p>
+    <div class="menuBtns">
+      <button class="btn big" id="btnEndFree">להמשיך לטוס בעולם</button>
+      <button class="btn" id="btnEndMenu">לתפריט</button>
+    </div>
+  </div>
+</div>
+
+<div id="mobileNote" class="hidden">המשחק הזה בנוי למחשב עם עכבר ומקלדת.</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
