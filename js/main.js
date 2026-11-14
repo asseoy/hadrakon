@@ -58,7 +58,7 @@ async function boot() {
   setLoad(1); await nextFrame();
   $('loading').classList.add('hidden');
   const sv = load(SAVE, null);
-  if (sv && sv.step > 0) { $('btnContinue').disabled = false; $('contFires').textContent = sv.fires || 0; }
+  if (sv && sv.step > 0) { $('btnContinue').disabled = false; $('contFires').textContent = sv.fires || 0; if (sv.step === 10) $('btnContinue').innerHTML = 'פרק 4: החורף <em class="newTag">חדש!</em>'; else if (sv.step > 10 && sv.step < 16) $('btnContinue').textContent = 'המשך – פרק 4: החורף'; }
   if (go) start(go); else showMenu();
   requestAnimationFrame(loop);
 }
@@ -88,6 +88,7 @@ function confirmNew() { if (newArmed) return true; newArmed = true; $('btnPlay')
 $('btnResume').onclick = () => resume();
 $('btnQuit').onclick = () => { G.save && G.save(); location.href = location.pathname; };
 $('btnEndFree').onclick = () => { G.free = true; resume(); };
+$('btnWinter').onclick = () => { G.ended = false; G.cine = false; G.missions.go(11); resume(); };
 $('btnEndMenu').onclick = () => { location.href = location.pathname; };
 addEventListener('keydown', e => { if (e.code === 'Escape' && G.playing && !G.uiOpen) pause(); });
 document.addEventListener('pointerlockchange', () => { if (!document.pointerLockElement && G.playing && !G.uiOpen && !G.ended) pause(); });
@@ -103,12 +104,15 @@ function start(mode) {
   if (mode === 'new') { saved = {}; store(SAVE, null); }
   else if (mode === 'cont') { saved = load(SAVE, {}) || {}; }
   else if (mode === 'free') { saved = load(SAVE, {}) || {}; G.free = true; }
-  if (saved.step >= 10) G.free = true;
+  if (saved.step >= 16) G.free = true; else if (saved.step === 10 && !G.free) saved.step = 11;
   G.playTime = saved.time || 0; playStart = performance.now();
   if (mode !== 'new' && saved.step > 0) G.flight.place(new THREE.Vector3(0, 60, 40), 0);
   createMissions(G, { ...saved, step: G.free ? Math.max(saved.step || 0, 1) : saved.step || 0 });
   G.save = () => { if (!G.missions || G.free) return; store(SAVE, { ...G.missions.state(), time: G.playTime + (performance.now() - playStart) / 1000 }); };
-  G.onEnd = () => { G.ended = true; G.save(); audio.sfx('win'); if (document.pointerLockElement) document.exitPointerLock(); const m = Math.round((G.playTime + (performance.now() - playStart) / 1000) / 60); $('endStats').textContent = `הדרקון של שבט הנשיא הציל את המחנה. זמן משחק: ${m} דקות.`; G.uiOpen = true; show('end'); $('hud').classList.add('hidden'); };
+  G.onEnd = () => { G.ended = true; G.save(); audio.sfx('win'); if (document.pointerLockElement) document.exitPointerLock(); const m = Math.round((G.playTime + (performance.now() - playStart) / 1000) / 60);
+    const w = !!G.winterDone; $('endOver').textContent = w ? 'תשעה נרות דולקים' : 'שמונה מדורות דולקות'; $('endTitle').textContent = w ? 'נס גדול היה פה' : 'מה שבונים ביחד – חי';
+    $('endStats').textContent = (w ? 'החנוכיון של בית דני דולק והכפור נמס.' : 'הדרקון של שבט הנשיא הציל את המחנה.') + ` זמן משחק: ${m <= 1 ? 'דקה' : m + ' דקות'}.`; $('btnWinter').classList.toggle('hidden', w);
+    G.uiOpen = true; show('end'); $('hud').classList.add('hidden'); };
   G.playing = true; resume();
 }
 G.sfx = n => audio.sfx(n);

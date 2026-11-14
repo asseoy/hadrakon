@@ -46,7 +46,7 @@ export function createFx(G) {
   // beacon flame (lit braziers) + a camp-fire style point light pool
   X.flame = (p, scale = 1, dt) => {
     for (let k = 0; k < Math.ceil(dt * 90 * scale); k++) fire.emit({ x: p.x + (Math.random() - 0.5) * 2.4 * scale, y: p.y + 0.5, z: p.z + (Math.random() - 0.5) * 2.4 * scale, vx: (Math.random() - 0.5) * 1.5, vy: 6 + Math.random() * 5 * scale, vz: (Math.random() - 0.5) * 1.5, max: 0.9 + Math.random() * 0.5, s0: 2.6 * scale, s1: 0.6, drag: 0.6, up: 2, c0: [1, 0.85, 0.4, 0.85], c1: [1, 0.2, 0.02, 0] });
-    if (Math.random() < dt * 14) smoke.emit({ x: p.x, y: p.y + 6 * scale, z: p.z, vx: (Math.random() - 0.5) * 2, vy: 5, vz: (Math.random() - 0.5) * 2, max: 4, s0: 4, s1: 14, drag: 0.4, up: 0.5, c0: [0.3, 0.28, 0.26, 0.3], c1: [0.5, 0.5, 0.5, 0] });
+    if (Math.random() < dt * 14 * Math.min(1, scale)) smoke.emit({ x: p.x, y: p.y + 6 * scale, z: p.z, vx: (Math.random() - 0.5) * 2, vy: 5 * Math.min(1, scale + 0.3), vz: (Math.random() - 0.5) * 2, max: 4, s0: 4 * Math.min(1, scale), s1: 14 * Math.min(1, scale), drag: 0.4, up: 0.5, c0: [0.3, 0.28, 0.26, 0.3], c1: [0.5, 0.5, 0.5, 0] });
   };
   X.burst = (p, n = 60, col = [1, 0.7, 0.2]) => { for (let k = 0; k < n; k++) { const a = Math.random() * 6.28, b = Math.random() * 3.14, s = 10 + Math.random() * 20; sparks.emit({ x: p.x, y: p.y, z: p.z, vx: Math.cos(a) * Math.sin(b) * s, vy: Math.cos(b) * s + 6, vz: Math.sin(a) * Math.sin(b) * s, max: 1.4, s0: 0.5, s1: 0.1, drag: 1.2, up: -9, c0: [...col, 1], c1: [col[0], col[1] * 0.4, 0, 0] }); } };
   X.splash = (p, v) => { for (let k = 0; k < 6; k++) smoke.emit({ x: p.x + (Math.random() - 0.5) * 4, y: 0.5, z: p.z + (Math.random() - 0.5) * 4, vx: v.x * 0.3 + (Math.random() - 0.5) * 4, vy: 4 + Math.random() * 6, vz: v.z * 0.3 + (Math.random() - 0.5) * 4, max: 1.1, s0: 1.2, s1: 4, drag: 1.5, up: -6, c0: [0.95, 0.98, 1, 0.7], c1: [0.9, 0.95, 1, 0] }); };
@@ -87,6 +87,9 @@ export function createSky(G) {
     dawn: { top: '#3a5f98', hor: '#f4b98a', sun: '#ffc88a', el: 0.12, az: 2.2, si: 2.4, hi: 0.8, fog: '#e8c6a8', near: 300, far: 2600 },
     day: { top: '#3f7fd0', hor: '#c8def0', sun: '#fff4e2', el: 0.75, az: 1.0, si: 3.2, hi: 1.0, fog: '#cfe0ea', near: 400, far: 2900 },
     sunset: { top: '#2c3f78', hor: '#ff9a62', sun: '#ff8a4a', el: 0.08, az: -0.6, si: 2.2, hi: 0.7, fog: '#e8a07a', near: 300, far: 2400 },
+    winter: { top: '#7f9cbc', hor: '#e2e8ef', sun: '#fff3e4', el: 0.3, az: 1.4, si: 2.0, hi: 1.15, fog: '#dfe5ec', near: 220, far: 1700 },
+    winterNight: { top: '#0c1426', hor: '#3a4a66', sun: '#a8b8ff', el: 0.5, az: 0.6, si: 0.5, hi: 0.55, fog: '#28344a', near: 150, far: 1300 },
+    blizzard: { top: '#4a5666', hor: '#a3adb9', sun: '#d6dee8', el: 0.4, az: 1.0, si: 0.9, hi: 0.85, fog: '#aab4c0', near: 60, far: 650 },
     storm: { top: '#151820', hor: '#3a3c44', sun: '#8890a0', el: 0.6, az: 1.0, si: 0.6, hi: 0.45, fog: '#2a2c33', near: 80, far: 900 },
   };
   const cur = {}, C = h => new THREE.Color(h);

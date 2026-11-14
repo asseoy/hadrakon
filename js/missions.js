@@ -3,6 +3,7 @@
 import * as THREE from 'three';
 import { createDragon } from './dragon.js';
 import { input } from './input.js';
+import { createWinter } from './winter.js';
 
 const $ = id => document.getElementById(id);
 const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
@@ -204,14 +205,16 @@ export function createMissions(G, saved) {
       update(dt) { const cam = G.camera; cam.position.lerp(V3(40, 50, 60), 1 - Math.exp(-0.5 * dt)); cam.lookAt(0, 34, 0); G.dragon.root.position.lerp(V3(0, 36, 0), 1 - Math.exp(-1.5 * dt)); F.pos.copy(G.dragon.root.position); F.speed = 2.6;
         if (stepT > 17 && !flags.end) { flags.end = 1; G.onEnd && G.onEnd(); } } },
   ];
+  STEPS.push(...createWinter(G, M, saved.winter || {}));
   M.update = (dt) => {
     if (!G.free) { const s = STEPS[M.step]; if (startedStep !== M.step) { startedStep = M.step; stepT = 0; s.start && s.start(); } stepT += dt; M.stepT = stepT; s.update && s.update(dt); }
-    beaconsUpdate(dt); radio(dt); marker();
+    beaconsUpdate(dt); G.winter && G.winter.tick(dt); radio(dt); marker();
   };
   if (G.free) { M.objective(''); M.say('noy', 'טיסה חופשית. העולם כולו שלך – נסה להדליק את כל המשואות!'); }
   M.go = n => go(n);
+  M.target = () => obj && obj.target ? (typeof obj.target === "function" ? obj.target() : obj.target) : null;
   M._camperTarget = () => { const c = campers.find(c => !c.home && !c.onBack); return c ? c.pos.clone().add(V3(0, 3, 0)) : W.camp.clone(); };
   M._stormTarget = () => { if (!storm) return null; const c = storm.crows.find(c => c.userData.hp > 0); return (c || storm.eye).getWorldPosition(new THREE.Vector3()); };
-  M.state = () => ({ fires: M.fires, step: M.step, lit: W.beacons.filter(b => b.lit).map(b => b.idx) });
+  M.state = () => ({ fires: M.fires, step: M.step, lit: W.beacons.filter(b => b.lit).map(b => b.idx), winter: G.winter ? G.winter.state() : undefined });
   G.missions = M; return M;
 }

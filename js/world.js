@@ -20,7 +20,12 @@ const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
 
 export function createWorld(G) {
   const S = G.scene, N = makeNoise(1975), SIZE = 3000, SEA = 0;
-  const W = { size: SIZE, sea: SEA, landmarks: [], beacons: [] };
+  const W = { size: SIZE, sea: SEA, landmarks: [], beacons: [], snowU: { value: 0 } };
+  // winter: whiten surfaces that face up (terrain, tree crowns) by W.snowU
+  const snowPatch = mat => { mat.onBeforeCompile = sh => { sh.uniforms.uSnow = W.snowU;
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying float vUp;').replace('#include <beginnormal_vertex>', '#include <beginnormal_vertex>\nvUp = objectNormal.y;');
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nuniform float uSnow; varying float vUp;').replace('#include <color_fragment>', '#include <color_fragment>\n  diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.92,0.95,0.99), uSnow * smoothstep(0.45, 0.8, vUp));'); }; return mat; };
+  W.setWinter = k => { W.snowU.value = k; };
   // region weights from angle around the camp: desert south-east, mountains north, forest west
   function regions(x, z) {
     const a = Math.atan2(z, x), r = Math.hypot(x, z);
@@ -66,7 +71,7 @@ export function createWorld(G) {
     }
     g.setAttribute('color', new THREE.BufferAttribute(col, 3)); g.computeVertexNormals();
     const tex = (() => { const cv = document.createElement('canvas'); cv.width = cv.height = 256; const x = cv.getContext('2d'); x.fillStyle = '#808080'; x.fillRect(0, 0, 256, 256); for (let i = 0; i < 9000; i++) { const v = 100 + Math.random() * 70; x.fillStyle = `rgb(${v},${v},${v})`; x.fillRect(Math.random() * 256, Math.random() * 256, 2, 2); } const t = new THREE.CanvasTexture(cv); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(220, 220); return t; })();
-    const terrain = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, map: tex }));
+    const terrain = new THREE.Mesh(g, snowPatch(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, map: tex })));
     terrain.receiveShadow = true; S.add(terrain);
   }
 
@@ -97,7 +102,7 @@ export function createWorld(G) {
   {
     const trunk = new THREE.CylinderGeometry(0.4, 0.6, 5, 6); trunk.translate(0, 2.5, 0);
     const crown = new THREE.IcosahedronGeometry(3.2, 0); crown.translate(0, 7, 0);
-    const tm = new THREE.MeshStandardMaterial({ color: 0x5a3e26, roughness: 1 }), cm = new THREE.MeshStandardMaterial({ color: 0x4a6e2e, roughness: 1, flatShading: true });
+    const tm = new THREE.MeshStandardMaterial({ color: 0x5a3e26, roughness: 1 }), cm = snowPatch(new THREE.MeshStandardMaterial({ color: 0x4a6e2e, roughness: 1, flatShading: true }));
     const pts = []; let tries = 0;
     while (pts.length < 4500 && tries++ < 80000) { const x = (Math.random() - 0.5) * SIZE * 0.85, z = (Math.random() - 0.5) * SIZE * 0.85, h = W.heightAt(x, z), rg = regions(x, z);
       if (h < SEA + 3 || rg.desert > 0.35 || h > 160 || rg.r < 90) continue; if (Math.random() > 0.25 + rg.forest * 0.75) continue; pts.push([x, h, z]); }
