@@ -58,7 +58,7 @@ async function boot() {
   setLoad(1); await nextFrame();
   $('loading').classList.add('hidden');
   const sv = load(SAVE, null);
-  if (sv && sv.step > 0) { $('btnContinue').disabled = false; $('contFires').textContent = sv.fires || 0; if (sv.step === 10) $('btnContinue').innerHTML = 'פרק 4: החורף <em class="newTag">חדש!</em>'; else if (sv.step > 10 && sv.step < 16) $('btnContinue').textContent = 'המשך – פרק 4: החורף'; }
+  if (sv && sv.step > 0) { $('btnContinue').disabled = false; $('contFires').textContent = sv.fires || 0; if (sv.step === 10) $('btnContinue').innerHTML = 'פרק 4: החורף <em class="newTag">חדש!</em>'; else if (sv.step > 10 && sv.step < 16) $('btnContinue').textContent = 'המשך – פרק 4: החורף'; else if (sv.step >= 16) $('btnContinue').textContent = 'טיסה חופשית (המשחק הושלם)'; }
   if (go) start(go); else showMenu();
   requestAnimationFrame(loop);
 }
