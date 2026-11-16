@@ -77,3 +77,76 @@ kbd{display:inline-block;font-family:var(--ui);font-weight:700;font-size:13px;pa
 #bossBar i{display:block;height:10px;border:1px solid #000;background:#111}
 #bossBar b{display:block;height:100%;width:100%;background:#9fd8ff}
 .newTag{font-style:normal;background:var(--yellow);color:#000;padding:0 6px;margin-right:6px;font-size:15px}
+
+/* ---------- touch (phones / tablets) – everything scoped to .touchdev / .touch, the computer version never gets these ---------- */
+.touchKeys{display:none}
+.touchdev .touchKeys{display:table}
+.touchdev .keys:not(.touchKeys){display:none}
+.touchdev body{-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+.touchdev #gl{touch-action:none}
+.touchdev .btn{touch-action:manipulation}
+.touchdev .btn:hover{transform:none;border-color:var(--line)}
+.touchdev .btn.big:hover{border-color:#000}
+.touchdev .screen{overflow-y:auto;align-items:flex-start;padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
+.touchdev .screen>*{margin:auto}
+.touchdev .btn{min-height:48px}
+.touchdev .sub{font-size:17px;margin:6px auto 16px}
+.touchdev .panel{padding:20px 18px;max-height:none}
+.touchdev .panel h2{font-size:44px}
+.touchdev .keys td:first-child{width:auto}
+.touchdev .row input[type=range]{width:min(200px,42vw)}
+@media (max-height:520px){
+  .touchdev .menuLogo{width:52px;margin-bottom:4px}
+  .touchdev .title{font-size:min(15vh,72px)}
+  .touchdev .title.small{font-size:min(13vh,56px)}
+  .touchdev .sub{font-size:15px;margin:4px auto 10px}
+  .touchdev .menuBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:min(560px,100%);margin:0 auto}
+  .touchdev .menuBtns .btn{min-width:0;padding:9px 12px;font-size:16px}
+  .touchdev .menuBtns .btn.big{grid-column:1/-1;font-size:20px}
+}
+/* HUD on small screens */
+.touchdev #fires{top:max(10px,env(safe-area-inset-top));right:max(10px,env(safe-area-inset-right));padding:6px 8px;gap:4px}
+.touchdev #fires i{width:10px;height:15px}
+.touchdev #fires b{font-size:13px}
+.touchdev #obj{top:calc(max(10px,env(safe-area-inset-top)) + 46px);font-size:15px;max-width:min(560px,calc(100vw - 24px));padding:5px 12px}
+.touchdev #radio{bottom:auto;top:calc(max(10px,env(safe-area-inset-top)) + 134px);width:min(560px,calc(100vw - 24px));padding:8px 12px 6px}
+.touchdev #rName{font-size:24px}
+.touchdev #rText{font-size:16px}
+.touchdev #prompt{bottom:auto;top:48%;font-size:15px;max-width:calc(100vw - 24px);text-align:center}
+.touchdev #bossBar{top:calc(max(10px,env(safe-area-inset-top)) + 96px)}
+.touch #prompt.tE{visibility:hidden}
+.touch #radio em{font-size:0}
+.touch #radio em::after{content:'הקשה – דלג';font-size:11px}
+.touch #speed{right:auto;bottom:calc(max(22px,env(safe-area-inset-bottom)) + 172px);left:max(18px,env(safe-area-inset-left));padding:2px 8px}
+.touch #speed b{font-size:28px}
+.touch #boost small{display:none}
+.touch #boost{left:max(18px,env(safe-area-inset-left));bottom:calc(max(22px,env(safe-area-inset-bottom)) + 142px);width:132px}
+#tLayer{position:fixed;inset:0;z-index:9;touch-action:none}
+#tUI{position:fixed;inset:0;z-index:15;pointer-events:none;font-family:var(--ui)}
+#tUI .tb,#tStick{pointer-events:auto;touch-action:none;-webkit-user-select:none;user-select:none}
+#tStick{position:absolute;width:132px;height:132px;left:max(18px,env(safe-area-inset-left));bottom:max(22px,env(safe-area-inset-bottom));background:rgba(11,11,11,.32);border:1px solid var(--line);pointer-events:none}
+#tStick::before{content:'';position:absolute;left:50%;top:10px;bottom:10px;border-left:1px dashed rgba(241,239,235,.18)}
+#tStick::after{content:'';position:absolute;top:50%;left:10px;right:10px;border-top:1px dashed rgba(241,239,235,.18)}
+#tStick i{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px 0 0 -27px;background:var(--chalk);border:1px solid #000;opacity:.85}
+#tStick.live{background:rgba(11,11,11,.5)}
+#tStick.live i{background:var(--yellow);opacity:1}
+.tb{position:absolute;display:flex;align-items:center;justify-content:center;font-family:var(--ui);font-weight:900;color:var(--chalk);background:rgba(11,11,11,.72);border:1px solid var(--line);padding:0;cursor:pointer}
+.tb.on{border-color:var(--yellow);transform:translateY(2px)}
+#tFire{width:94px;height:94px;right:max(16px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));background:var(--red);border-color:#000;font-family:var(--disp);font-size:44px;font-weight:700}
+#tFire.on{background:#c8161f;border-color:var(--yellow)}
+#tBoost{width:72px;height:72px;right:calc(max(16px,env(safe-area-inset-right)) + 106px);bottom:max(18px,env(safe-area-inset-bottom));font-size:17px;color:#000;background:var(--yellow);border-color:#000}
+#tBoost.on{background:#fff36a}
+#tUp{width:72px;height:72px;right:calc(max(16px,env(safe-area-inset-right)) + 11px);bottom:calc(max(18px,env(safe-area-inset-bottom)) + 106px);font-size:17px}
+#tE{min-width:72px;height:58px;right:calc(max(16px,env(safe-area-inset-right)) + 94px);bottom:calc(max(18px,env(safe-area-inset-bottom)) + 112px);gap:8px;padding:0 12px;border-color:var(--yellow);background:var(--ink);font-size:15px;max-width:calc(100vw - 140px)}
+#tE b{font-size:24px;color:var(--yellow)}
+#tE span{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#tPause{width:46px;height:46px;left:max(10px,env(safe-area-inset-left));top:max(10px,env(safe-area-inset-top));gap:7px}
+#tPause i{display:block;width:6px;height:18px;background:var(--chalk)}
+/* short landscape phones: HUD texts stay clear of the controls */
+@media (max-height:520px){
+  .touchdev #obj{top:max(10px,env(safe-area-inset-top));max-width:min(420px,calc(100vw - 440px));font-size:14px}
+  .touchdev #radio{top:calc(max(10px,env(safe-area-inset-top)) + 62px);width:min(460px,calc(100vw - 380px))}
+  .touchdev #rText{font-size:14px}
+  .touchdev #rName{font-size:20px}
+  .touchdev #bossBar{top:calc(max(10px,env(safe-area-inset-top)) + 56px)}
+}

@@ -14,6 +14,7 @@ addEventListener('mouseup', e => { if (e.button === 0) input.lmb = false; });
 document.addEventListener('pointerlockchange', () => { input.locked = !!document.pointerLockElement; if (!input.locked) input.lmb = false; });
 
 input.begin = () => {
+  if (input.onBegin) input.onBegin();   // touch controls (js/touch.js), only once a touch happened
   const k = input.keys;
   input.f = (k.KeyW || k.ArrowUp ? 1 : 0) - (k.KeyS || k.ArrowDown ? 1 : 0);
   input.sprint = !!(k.ShiftLeft || k.ShiftRight);

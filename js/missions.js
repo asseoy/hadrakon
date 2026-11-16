@@ -7,6 +7,7 @@ import { createWinter } from './winter.js';
 
 const $ = id => document.getElementById(id);
 const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
+const K = (G, desk, touch) => G.touch ? touch : desk;   // tutorial wording for keyboard vs touch
 export function createMissions(G, saved) {
   const S = G.scene, W = G.world, F = G.flight, X = G.fx;
   const M = { fires: saved.fires || 0, step: saved.step || 0, chapter: 1 };
@@ -162,13 +163,13 @@ export function createMissions(G, saved) {
       } },
     // 1: flight school
     { start() { M.card('פרק 1', 'ההתעוררות'); clearRings(); const pts = [[0, 48, 60], [60, 55, 100], [130, 62, 80], [170, 70, 0], [130, 75, -90], [40, 70, -130], [-60, 60, -90], [-90, 50, 0]]; pts.forEach((p, i) => { const n = pts[(i + 1) % pts.length]; ring(V3(...p), Math.atan2(n[0] - p[0], n[2] - p[2])); });
-        M.say('noy', 'לא יאומן. אתה חי! אני נוי, רכזת המחנה. בוא נראה אם אתה יודע לעוף.'); M.say('noy', 'עקוב עם העכבר לאן שאתה רוצה לטוס. W – לנפנף בכנפיים, Shift – לזנק קדימה.'); M.objective('עוף דרך הטבעות הזוהרות', () => M.nextRing()); },
+        M.say('noy', 'לא יאומן. אתה חי! אני נוי, רכזת המחנה. בוא נראה אם אתה יודע לעוף.'); M.say('noy', K(G, 'עקוב עם העכבר לאן שאתה רוצה לטוס. W – לנפנף בכנפיים, Shift – לזנק קדימה.', 'גרור באצבע ימין לאן שאתה רוצה לטוס. ג׳ויסטיק למעלה – לנפנף בכנפיים, זינוק – לזנק קדימה.')); M.objective('עוף דרך הטבעות הזוהרות', () => M.nextRing()); },
       update() { if (ringsUpdate()) { clearRings(); M.say('noy', 'מדהים! אתה טס כמו נשר. עכשיו – משהו חשוב.'); go(2); } } },
     // 2: light the camp fire
-    { start() { M.say('noy', 'הלילה הגיעה הסערה השחורה וכיבתה את כל שמונה המדורות של המחנה. בלי האש – המחנה נגמר.'); M.say('noy', 'אתה דרקון. אתה יודע לירוק אש! טוס למדורה, הסתכל עליה ולחץ על העכבר.'); M.objective('הדלק את מדורת המחנה (לחיצה על העכבר = אש)', () => beacon(0).pos); },
+    { start() { M.say('noy', 'הלילה הגיעה הסערה השחורה וכיבתה את כל שמונה המדורות של המחנה. בלי האש – המחנה נגמר.'); M.say('noy', K(G, 'אתה דרקון. אתה יודע לירוק אש! טוס למדורה, הסתכל עליה ולחץ על העכבר.', 'אתה דרקון. אתה יודע לירוק אש! טוס למדורה, הסתכל עליה והחזק את כפתור האש.')); M.objective(K(G, 'הדלק את מדורת המחנה (לחיצה על העכבר = אש)', 'הדלק את מדורת המחנה (כפתור אש)'), () => beacon(0).pos); },
       update() { if (lit(0)) { M.say('kids', 'יששש! האש חזרה!'); M.say('noy', 'מדורה ראשונה דולקת! אבל רגע... שלושה חניכים יצאו בלילה לחפש עצים ולא חזרו.'); go(3); } } },
     // 3: lost campers
-    { start() { spawnCampers(); M.say('noy', 'חפש עמודי עשן – הם מסמנים איפה הם. טוס נמוך ולאט, ולחץ E כדי להרים אותם על הגב.'); M.objective('הצל את 3 החניכים והחזר אותם למחנה', () => { const c = campers.find(c => !c.home && !c.onBack); return c ? c.pos.clone().add(V3(0, 4, 0)) : W.camp; }); },
+    { start() { spawnCampers(); M.say('noy', 'חפש עמודי עשן – הם מסמנים איפה הם. ' + K(G, 'טוס נמוך ולאט, ולחץ E כדי להרים אותם על הגב.', 'טוס נמוך ולאט, ולחץ על כפתור E כדי להרים אותם על הגב.')); M.objective('הצל את 3 החניכים והחזר אותם למחנה', () => { const c = campers.find(c => !c.home && !c.onBack); return c ? c.pos.clone().add(V3(0, 4, 0)) : W.camp; }); },
       update(dt) { if (campersUpdate(dt)) { M.say('noy', 'כולם בבית! אתה גיבור. אבל הסערה לקחה את האש של המחנה למקומות רחוקים...'); M.say('noy', 'ראיתי עשן על הטיל הישן במדבר – המתקן מ־1986. שם מחכה המדורה השנייה.'); go(4); } } },
     // 4: chapter 2 – rocket
     { start() { M.card('פרק 2', 'אש בכל הארץ'); G.sky.set('day'); M.objective('הדלק את המשואה בראש הטיל', () => beacon(1).pos); },
@@ -182,7 +183,7 @@ export function createMissions(G, saved) {
         const done = ringsUpdate(); const myProg = rings.filter(r => r.passed).length / rings.length;
         const rubber = myProg > greenS ? 1.1 : 0.85; const gDone = greenFly(dt, raceRings, (26 + Math.min(14, (G.t - raceStart) * 0.6)) * rubber);
         if (done && !flags.win && !gDone) { flags.win = 1; clearRings(); M.say('dani', 'וואו... ניצחת אותי ביושר. קבל – המדורה שלך.'); M.say('dani', 'מהיום – בית דני והנשיא נלחמים ביחד בסערה!'); M.objective('הדלק את המשואה על שער האריה', () => beacon(5).pos); }
-        if (gDone && !flags.win && !flags.lost) { flags.lost = 1; M.say('dani', 'הגעתי ראשון! חחח. רוצה עוד סיבוב?'); M.say('noy', 'נסה שוב – תשתמש ב־Shift בישורות!'); setTimeout(() => go(5), 3500); }
+        if (gDone && !flags.win && !flags.lost) { flags.lost = 1; M.say('dani', 'הגעתי ראשון! חחח. רוצה עוד סיבוב?'); M.say('noy', K(G, 'נסה שוב – תשתמש ב־Shift בישורות!', 'נסה שוב – תשתמש בזינוק בישורות!')); setTimeout(() => go(5), 3500); }
         if (flags.win && lit(5)) go(6);
       } },
     // 6: Big Ben

@@ -11,6 +11,7 @@ import { createSky, createFx } from './fx.js';
 import { createDragon } from './dragon.js';
 import { createFlight } from './flight.js';
 import { createMissions } from './missions.js';
+import { touchLikely, initTouch } from './touch.js';
 
 const $ = id => document.getElementById(id);
 const SAVE = 'hadrakon:save', SET = 'hadrakon:settings';
@@ -22,11 +23,11 @@ G.settings = Object.assign({ sens: 1, vol: 0.8, invert: false, qual: 'high' }, l
 const params = new URLSearchParams(location.search), go = params.get('go');
 const nextFrame = () => new Promise(r => requestAnimationFrame(() => setTimeout(r, 0)));
 const setLoad = p => { $('loadBar').style.width = Math.round(p * 100) + '%'; };
-if (matchMedia('(pointer:coarse)').matches && !matchMedia('(pointer:fine)').matches) $('mobileNote').classList.remove('hidden');
+if (matchMedia('(pointer:coarse)').matches && !matchMedia('(pointer:fine)').matches && !touchLikely && !navigator.maxTouchPoints) $('mobileNote').classList.remove('hidden');
 
 // ---------- renderer ----------
 const hi = G.settings.qual === 'high';
-const renderer = new THREE.WebGLRenderer({ canvas: $('gl'), antialias: !hi, powerPreference: 'high-performance' });
+const renderer = new THREE.WebGLRenderer({ canvas: $('gl'), antialias: !hi || touchLikely, powerPreference: 'high-performance' });
 renderer.setPixelRatio(Math.min(devicePixelRatio, hi ? 1.5 : 1));
 renderer.setSize(innerWidth, innerHeight);
 renderer.shadowMap.enabled = hi; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -42,6 +43,15 @@ if (hi) {
   composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth / 2, innerHeight / 2), 0.35, 0.5, 0.88));
   composer.addPass(new OutputPass());
 }
+// phones/tablets: cheaper frame (pixel ratio <= 1.25, no shadows, no bloom). Called at load on touch devices and on the first touch.
+let lowQ = false;
+G.lowQuality = () => {
+  if (lowQ) return; lowQ = true;
+  renderer.setPixelRatio(Math.min(devicePixelRatio, hi ? 1.25 : 1)); renderer.setSize(innerWidth, innerHeight);
+  composer = null;
+  if (renderer.shadowMap.enabled) { renderer.shadowMap.enabled = false; G.scene.traverse(o => { if (o.material) [].concat(o.material).forEach(m => { m.needsUpdate = true; }); }); }
+};
+if (touchLikely) G.lowQuality();
 addEventListener('resize', () => { G.camera.aspect = innerWidth / innerHeight; G.camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); composer && composer.setSize(innerWidth, innerHeight); });
 
 // ---------- build ----------
@@ -93,7 +103,7 @@ $('btnEndMenu').onclick = () => { location.href = location.pathname; };
 addEventListener('keydown', e => { if (e.code === 'Escape' && G.playing && !G.uiOpen) pause(); });
 document.addEventListener('pointerlockchange', () => { if (!document.pointerLockElement && G.playing && !G.uiOpen && !G.ended) pause(); });
 $('gl').addEventListener('click', () => { if (G.playing && !G.uiOpen && !document.pointerLockElement) lock(); });
-function lock() { try { const p = $('gl').requestPointerLock(); p && p.catch && p.catch(() => { }); } catch { } }
+function lock() { if (input.touch) return; try { const p = $('gl').requestPointerLock(); p && p.catch && p.catch(() => { }); } catch { } }
 function pause() { G.uiOpen = true; show('pause'); G.save && G.save(); }
 function resume() { show(null); G.uiOpen = false; $('hud').classList.remove('hidden'); audio.init(); lock(); }
 
@@ -116,6 +126,7 @@ function start(mode) {
   G.playing = true; resume();
 }
 G.sfx = n => audio.sfx(n);
+initTouch({ G, pause: () => { if (G.playing && !G.uiOpen && !G.ended) pause(); }, lowQuality: G.lowQuality, audio: () => { audio.init(); audio.setVol(G.settings.vol); } });
 let promptText = '';
 G.prompt = t => { promptText = t; };
 
